@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+<!-- Graphs with animations. -->
+
+<head>
+    <style>
+        body {
+            font: 15px sans-serif;
+        }
+
+        .tooltip {
+            position: absolute;
+            font-size: 14px;
+            width: auto;
+            height: auto;
+            pointer-events: none;
+            background-color: white;
+            border: solid;
+            border-width: 1px;
+            border-radius: 5px;
+            padding: 10px;
+        }
+
+        .grid line {
+            stroke: lightgrey;
+            stroke-opacity: 0.7;
+            shape-rendering: crispEdges;
+        }
+
+        .grid path {
+            stroke-width: 0;
+        }
+
+        .form-controls--mr-graph {
+            margin-right: 90px;
+        }
+    </style>
+</head>
+
+<body>
+    <script src="https://d3js.org/d3.v4.js"></script>
+
+    <fieldset
+        class="form-controls form-controls--align-end form-controls--top-padding form-controls--no-margin form-controls--mr-graph">
+        <div class="form-controls form-controls--radio-tab">
+            <input type="radio" name="id58a6f4f8a0142" id="Månad" value="when-needed" />
+            <label for="Månad">5 VECKOR</label>
+        </div>
+        <div class="form-controls form-controls--radio-tab">
+            <input type="radio" checked="checked" name="id58a6f4f8a0142" id="Vecka" value="repeating" />
+            <label for="Vecka">7 DAGAR</label>
+        </div>
+        <div class="form-controls form-controls--radio-tab">
+            <input type="radio" name="id58a6f4f8a0142" id="Dygn" value="when-needed" />
+            <label for="Dygn">24 TIMMAR</label>
+        </div>
+    </fieldset>
+
+    <div id="graphs"></div>
+
+    <script>
+        // set the dimensions and margins
+        var margin = { top: 50, right: 30, bottom: 50, left: 60 },
+            width = 800 - margin.left - margin.right,
+            height = 500 - margin.top - margin.bottom;
+
+        // append the svg object to the div element "graphs" in the body
+        var svg = d3.select("#graphs").append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            // append g element to the SVG, used to group SVG shapes
+            .append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+        // data
+        d3.json("https://raw.githubusercontent.com/Soutea/Covid-19_Measurements/master/Oxygen/Monthly/oxygen_month.json",
+            function (data) {
+
+                // x-axis
+                var x = d3.scaleTime()
+                    .domain([new Date(2020, 3, 20), new Date(2020, 3, 27)])
+                    .range([0, width]);
+
+                svg.append("g")
+                    .attr("class", "xaxis")
+                    .attr("transform", "translate(0," + height + ")")
+                    .call(d3.axisBottom(x).tickFormat(new Intl.DateTimeFormat(undefined).format).ticks(6));
+
+                // y-axis
+                var y = d3.scaleLinear()
+                    .domain([70, 100])
+                    .range([height, 0]);
+
+                svg.append("g")
+                    .attr("class", "yaxis")
+                    .call(d3.axisLeft(y).ticks(5)); // showing every 5th value
+
+                /** FUNCTIONS FOR CHANGING VIEWS **/
+
+                function toDay() { //to day
+                    x.domain([new Date(2020, 3, 20), new Date(2020, 3, 21)])
+
+                    svg.selectAll("g.xaxis")
+                        .transition().duration(1000)
+                        .call(d3.axisBottom(x)
+                            .tickFormat(new Intl.DateTimeFormat(undefined, { hour: "numeric", minute: "numeric" })
+                                .format).ticks(8)); //20 ticks gives hour-view
+
+                    svg.selectAll("circle")
+                        .data(data)
+                        .transition()
+                        .duration(1000)
+                        .attr("cx", function (d) { return x(d3.isoParse(d.Timestamp)); })
+                        .attr("cy", function (d) { return y(d.Oxygen); })
+
+                    svg.selectAll("g.gridx")
+                        .transition()
+                        .duration(1000)
+                        .call(make_x_gridlines_day()
+                            .tickSize(-height)
+                            .tickFormat("") //try remove it
+                        )
+
+                }
+                function toWeek() { //to week again
+                    x.domain([new Date(2020, 3, 20), new Date(2020, 3, 27)])
+
+                    svg.selectAll("g.xaxis")
+                        .transition().duration(1000)
+                        .call(d3.axisBottom(x).tickFormat(new Intl.DateTimeFormat(undefined).format).ticks(6));
+
+                    svg.selectAll("circle")
+                        .data(data)
+                        .transition()
+                        .duration(1000)
+                        .attr("cx", function (d) { return x(d3.isoParse(d.Timestamp)); })
+                        .attr("cy", function (d) { return y(d.Oxygen); })
+
+                    svg.selectAll("g.gridx")
+                        .transition()
+                        .duration(1000)
+                        .call(make_x_gridlines_week()
+                            .tickSize(-height)
+                            .tickFormat("")
+                        )
+                }
+
+                function toMonth() { //to month
+                    x.domain([new Date(2020, 3, 20), new Date(2020, 4, 20)])
+
+                    svg.selectAll("g.xaxis")
+                        .transition().duration(1000)
+                        .call(d3.axisBottom(x).tickFormat(new Intl.DateTimeFormat(undefined).format).ticks(8)) //8 ticks gives week-view
+
+
+                    svg.selectAll("circle")
+                        .data(data)
+                        .transition()
+                        .duration(1000)
+                        .attr("cx", function (d) { return x(d3.isoParse(d.Timestamp)); })
+                        .attr("cy", function (d) { return y(d.Oxygen); })
+
+                    svg.selectAll("g.gridx")
+                        .transition()
+                        .duration(1000)
+                        .call(make_x_gridlines_month()
+                            .tickSize(-height)
+                            .tickFormat("") //try remove it
+                        )
+                }
+
+                // for buttons
+                d3.select("#Månad").on("click", toMonth);
+                d3.select("#Vecka").on("click", toWeek);
+                d3.select("#Dygn").on("click", toDay);
+
+                /** END OF FUNCTIONS TO CHANGE VIEW **/
+
+
+                /** grid lines in x axis function **/
+                function make_x_gridlines_week() {
+                    return d3.axisBottom(x).ticks(8) //for week
+                }
+
+                function make_x_gridlines_day() {
+                    return d3.axisBottom(x).ticks(8) //for day
+                }
+
+                function make_x_gridlines_month() {
+                    return d3.axisBottom(x).ticks(8) //for month
+                }
+
+                //grid lines in y axis function
+                function make_y_gridlines() {
+                    return d3.axisLeft(y).ticks(8)
+                }
+
+                // adding the X grid lines to the main view, week
+                svg.append("g")
+                    .attr("class", "grid gridx") //for CSS
+                    .attr("transform", "translate(0," + height + ")") //for position
+                    .call(make_x_gridlines_week()
+                        .tickSize(-height)
+                        .tickFormat("")
+                    )
+
+                // adding the Y grid lines
+                svg.append("g")
+                    .attr("class", "grid gridy")
+                    .call(make_y_gridlines()
+                        .tickSize(-width)
+                        .tickFormat("")
+                    )
+
+                // tooltip
+                var tooltip = d3.select("#graphs")
+                    .append("div")
+                    .attr("class", "tooltip")
+                    .style("opacity", 0);
+
+                var tipMouseover = function (d) {
+                    var html = "Tid: " + d3.isoParse(d.Timestamp).toLocaleString() + "<br/>" + "</b> Syremättnad: " + d.Oxygen + "%";
+                    tooltip.html(html)
+                        .style("left", (d3.event.pageX + 15) + "px")
+                        .style("top", (d3.event.pageY - 28) + "px")
+                        .transition()
+                        .duration(200)
+                        .style("opacity", 1)
+                    d3.select(this)
+                        .style("stroke", "black") //black when hoover
+
+
+                };
+                // when leaving the hoovered dot
+                var tipMouseout = function (d) {
+                    tooltip.transition()
+                        .duration(300) // ms
+                        .style("opacity", 0)
+                    d3.select(this)
+                        .style("stroke", "none")
+                };
+                // x-axis label
+                svg.append("text")
+                    .attr("text-anchor", "end")
+                    .attr("transform", "rotate(-90)")
+                    .attr("y", -margin.left + 20)
+                    .attr("x", -margin.top)
+                    .text("")
+
+                // y-axis label
+                svg.append("text")
+                    .attr("y", "-0.5em")
+                    .attr("x", "-0.5em")
+                    .text("%");
+                // scatters
+                svg.append('g')
+                    .selectAll("dot")
+                    .data(data)
+                    .enter()
+                    .append("circle")
+                    .attr("cx", function (d) { return x(d3.isoParse(d.Timestamp)); })
+                    .attr("cy", function (d) { return y(d.Oxygen); })
+                    .attr("r", 5)
+                    .attr("opacity", 0.8)
+                    .style("fill", "#67ad3d")
+                    .style("stroke", "#67ad3d")
+                    .on("mouseover", tipMouseover)
+                    .on("mouseout", tipMouseout)
+            })
+
+    </script>
+</body>

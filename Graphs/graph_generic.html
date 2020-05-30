@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+<!-- Graphs with a generic approach. Latest version. -->
+
+<head>
+    <!-- Styling of the graphs -->
+    <style>
+        .focus-text {
+            position: absolute;
+            font-size: 12px;
+            color: white;
+            width: auto;
+            height: auto;
+            pointer-events: none;
+            background-color: #45536C;
+            border: solid;
+            border-width: 1px;
+            padding: 10px;
+        }
+
+        .hover-line {
+            stroke: #404e68;
+            stroke-opacity: 0.5;
+            stroke-width: 2px;
+        }
+
+        .grid line {
+            stroke: lightgrey;
+            stroke-opacity: 0.7;
+            shape-rendering: crispEdges;
+        }
+
+        .xaxis .tick {
+            display: none;
+        }
+
+        .yaxis line {
+            display: none;
+        }
+
+        .grid path {
+            stroke-width: 0;
+        }
+
+        .form-controls--mr-graph {
+            margin-right: 90px;
+        }
+
+        .band-text,
+        .date-text,
+        .yaxis .tick {
+            font-size: 12px;
+        }
+
+        .band>rect:nth-child(2n) {
+            opacity: 0;
+        }
+
+        .band>rect {
+            opacity: 0.1;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Loading D3.js script -->
+    <script src="https://d3js.org/d3.v4.js"></script>
+
+    <!-- Buttons for toggling between views -->
+    <fieldset
+        class="form-controls form-controls--align-end form-controls--top-padding form-controls--no-margin form-controls--mr-graph">
+        <div class="form-controls form-controls--radio-tab">
+            <input type="radio" name="id58a6f4f8a0142" id="Månad" value="when-needed" />
+            <label for="Månad">5 VECKOR</label>
+        </div>
+        <div class="form-controls form-controls--radio-tab">
+            <input type="radio" checked="checked" name="id58a6f4f8a0142" id="Vecka" value="repeating" />
+            <label for="Vecka">7 DAGAR</label>
+        </div>
+        <div class="form-controls form-controls--radio-tab">
+            <input type="radio" name="id58a6f4f8a0142" id="Dygn" value="when-needed" />
+            <label for="Dygn">24 TIMMAR</label>
+        </div>
+    </fieldset>
+
+    <!-- Hardcoded values (no server) -->
+    <div>
+        <input type="hidden" id="requestURL"
+            value="https://raw.githubusercontent.com/Soutea/Covid-19_Measurements/master/JSON/fredrik.json" />
+        <input type="hidden" id="endDate" value="2020-05-27 00:00:00">
+        <input type="hidden" id="endDate24" value="2020-05-28 00:00:00">
+        <input type="hidden" id="startDateWeek" value="2020-05-20 00:00:00">
+        <input type="hidden" id="startDateMonth" value="2020-04-27 00:00:00">
+        <input type="hidden" id="endDateMonth" value="2020-06-01 00:00:00">
+    </div>
+
+    <!-- Where the graphs will be loaded -->
+    <div id="graphs"></div>
+
+    <script>
+        //Responsive function 
+        function makeResponsive(svg) {
+            // get container + svg aspect ratio
+            var container = d3.select(svg.node().parentNode),
+                width = parseInt(svg.style("width")),
+                height = parseInt(svg.style("height")),
+                aspect = width / height;
+            // add viewBox and preserveAspectRatio properties,
+            // and call resize so that svg resizes on inital page load
+            svg.attr("viewBox", "0 0 " + width + " " + height)
+                .attr("perserveAspectRatio", "xMinYMid")
+                .call(resize);
+            // api docs: https://github.com/mbostock/d3/wiki/Selections#on
+            d3.select(window).on("resize." + container.attr("id"), resize);
+            // get width of container and resize svg to fit it
+            function resize() {
+                var targetWidth = parseInt(container.style("width"));
+                svg.attr("width", targetWidth);
+                svg.attr("height", Math.round(targetWidth / aspect));
+            }
+        }
+        // set the default dimensions and margins
+        var margin = { top: 20, right: 30, bottom: 80, left: 60 },
+            width = 900 - margin.left - margin.right,
+            height = 500 - margin.top - margin.bottom;
+
+        // append the svg object to the div element "graphs" in the body
+        var svg = d3.select("#graphs").append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .call(makeResponsive)
+            // append g element to the SVG, used to group SVG shapes
+            .append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+        // data
+        d3.json("https://raw.githubusercontent.com/Soutea/Covid-19_Measurements/master/JSON/fredrik2.json",
+            function (data) {
+
+                //sort unsorted data
+                data.DataPoints.sort(function (d1, d2) { return d3.isoParse(d1.MeasuredAt) - d3.isoParse(d2.MeasuredAt) });
+
+                var enddate = new Date($("#endDate").val());
+                var enddate24 = new Date($("#endDate24").val());
+                var startdateWeek = new Date($("#startDateWeek").val());
+                var startdateMonth = new Date($("#startDateMonth").val());
+                var enddateMonth = new Date($("#endDateMonth").val());
+
+
+                function toDay() {
+                    render({
+                        dateInterval: [enddate, enddate24],
+                        tickInterval: d3.timeHour.every(4),
+                        tickFormat: new Intl.DateTimeFormat(undefined, { hour: "numeric", minute: "numeric" }).format,
+                        dateFormat: { weekday: "long", day: "numeric", month: "long", year: "numeric" },
+                        tickFormatInterval: true,
+                        bandLabelPos: 4.5
+                    });
+                }
+                function toWeek() {
+                    render({
+                        dateInterval: [startdateWeek, enddate],
+                        tickInterval: d3.timeDay.every(1),
+                        tickFormat: new Intl.DateTimeFormat(undefined, { weekday: "long" }).format,
+                        dateFormat: { day: "numeric", month: "long" },
+                        dateFormat2: { day: "numeric", month: "long", year: "numeric" },
+                        dateFormatInterval: true,
+                        bandLabelPos: 3
+                    })
+                }
+                function toMonth() { //to 5-weeks
+                    render({
+                        dateInterval: [startdateMonth, enddateMonth],
+                        tickInterval: d3.timeMonday.every(1),
+                        tickFormat: d3.timeFormat(" Vecka %V"),
+                        dateFormat: { day: "numeric", month: "long" },
+                        dateFormat2: { day: "numeric", month: "long", year: "numeric" },
+                        dateFormatInterval: true,
+                        bandLabelPos: 3
+                    })
+                }
+                function render({ tickInterval, dateInterval, tickFormat, dateFormat, dateFormat2,
+                    tickFormatInterval, dateFormatInterval, bandLabelPos }) {
+
+                    x.domain(dateInterval)
+
+                    // dots
+                    var circles = svg.select(".circles")
+                        .selectAll("circle")
+                        .data(data.DataPoints.filter(d => (dateInterval[0] <= d3.isoParse(d.MeasuredAt)) && (d3.isoParse(d.MeasuredAt) <= dateInterval[1])))
+                        .attr("cx", function (d) { return x(d3.isoParse(d.MeasuredAt)); })
+                        .attr("cy", function (d) { return y(d.Value); })
+                    circles.exit().remove()
+                    circles.enter().append("circle")
+                        .attr("r", 5)
+                        .attr("opacity", 0.8)
+                        .style("fill", "#404e68")
+                        .on('mouseover', tipMouseOver)
+                        .on('mousemove', tipMouseOver)
+                        .on('mouseout', tipMouseOut)
+                        .attr("cx", function (d) { return x(d3.isoParse(d.MeasuredAt)); })
+                        .attr("cy", function (d) { return y(d.Value); })
+
+                    // vertical grid lines
+                    svg.selectAll("g.gridx")
+                        .call(d3.axisBottom(x).ticks(tickInterval)
+                            .tickFormat("")
+                            .tickSize(-height))
+
+                    // bands
+                    var bands = svg.selectAll(".band")
+                        .selectAll("rect")
+                        .data(interLaced())
+                        .attr("y", d => 0)
+                        .attr("height", height)
+                        .attr("x", d => x(d.start))
+                        .attr("width", d => x(d.end) - x(d.start))
+                    bands.exit().remove()
+                    bands.enter().append("rect")
+                        .attr("y", d => 0)
+                        .attr("height", height)
+                        .attr("x", d => x(d.start))
+                        .attr("width", d => x(d.end) - x(d.start))
+
+                    // text for bands
+                    var bandsText = svg.select(".band-text")
+                        .selectAll("text")
+                        .data(interLaced())
+                        .attr("y", height + 20)
+                        .attr("x", d => x(d.start) + (x(d.end) - x(d.start)) / bandLabelPos)
+                        .text(d => bandLabel(d, tickFormat, tickFormatInterval))
+                    bandsText.exit().remove()
+                    bandsText.enter().append("text")
+                        .attr("y", height + 20)
+                        .attr("x", d => x(d.start) + (x(d.end) - x(d.start)) / bandLabelPos)
+                        .text(d => bandLabel(d, tickFormat, tickFormatInterval))
+
+                    // text for date label
+                    var dateText = svg.select(".date-text")
+                        .selectAll("text")
+                        .data(dateInterval)
+                        .attr("y", height + 60)
+                        .attr("x", width / 2.3) //position
+                        .text(d => dateLabel(dateInterval, dateFormat, dateFormat2, dateFormatInterval))
+                    dateText.exit().remove()
+                    dateText.enter().append("text")
+                        .data(dateInterval)
+                        .attr("y", height + 60)
+                        .attr("x", width / 2.3) //position
+                        .text(d => dateLabel(dateInterval, dateFormat, dateFormat2, dateFormatInterval))
+                }
+
+                // labels for the x-axis
+                function bandLabel(d, tickFormat, tickFormatInterval) {
+                    if (tickFormatInterval) {
+                        return tickFormat(d.start)
+                            + " - " + tickFormat(d.end);
+                    }
+                    else {
+                        return tickFormat(d.start);
+                    }
+                };
+
+                // label for the date interval of the current graph
+                function dateLabel(dateInterval, dateFormat, dateFormat2, dateFormatInterval) {
+                    if (dateFormatInterval) {
+                        return new Intl.DateTimeFormat(undefined, dateFormat).format(dateInterval[0])
+                            + " - " + new Intl.DateTimeFormat(undefined, dateFormat2).format(dateInterval[1]);
+                    }
+                    else {
+                        return new Intl.DateTimeFormat(undefined, dateFormat).format(dateInterval[0]);
+                    }
+                };
+                // x-axis
+                var x = d3.scaleTime()
+                    .range([0, width]);
+                svg.append("g")
+                    .attr("class", "xaxis")
+                    .attr("transform", "translate(0," + height + ")")
+
+                // calculate the values of the y-axis
+                var values = Array.from(data.DataPoints, x => parseInt(x.Value));
+                var yMin = (Math.round(Math.min(...values) / 10) * 10) - 10;
+                var yMax = (Math.round(Math.max(...values) / 10) * 10) + 10;
+
+                // y-axis
+                var y = d3.scaleLinear()
+                    .domain([yMin, yMax])
+                    .range([height, 0]);
+                svg.append("g")
+                    .attr("class", "yaxis")
+                    .call(d3.axisLeft(y).ticks(6)) // showing every 5th value
+                    .call(g => g.select(".domain").remove()); // hide axis line
+
+                // adding the x grid lines
+                svg.append("g")
+                    .attr("class", "grid gridx")
+                    .attr("transform", "translate(0," + height + ")") //for position
+
+                // adding the y grid lines
+                svg.append("g")
+                    .attr("class", "grid gridy")
+                    .call(d3.axisLeft(y).ticks(8)
+                        .tickSize(-width)
+                        .tickFormat(""))
+
+                // function for interlaced pattern
+                function interLaced() {
+                    var bands = [];
+                    var start;
+                    d3.selectAll(".gridx .tick line")
+                        .each(function (d, i) {
+                            if (start != undefined) {
+                                bands.push({ "start": start, "end": d })
+                            }
+                            start = d;
+                        });
+                    return bands;
+                }
+
+                // add the interlaced pattern
+                svg.append("g")
+                    .attr("class", "band")
+
+                //add the text for the interlaced pattern
+                svg.append("g")
+                    .attr("class", "band-text")
+
+                //add the second text
+                svg.append("g")
+                    .attr("class", "date-text")
+
+                // This allows to find the closest X index of the mouse:
+                var bisect = d3.bisector(function (d) { return d3.isoParse(d.MeasuredAt); }).left;
+
+                // Create the hover line
+                var focus = svg.append('g')
+                    .attr("class", "hover-line")
+                    .append('line')
+                    .attr("y1", 0)
+                    .attr("y2", height)
+                    .style("opacity", 0)
+
+                // Create the text for the hover line
+                var focusText = d3.select("#graphs")
+                    .append('div')
+                    .attr("class", "focus-text")
+                    .style("opacity", 0)
+
+                // Function for the hover
+                var tipMouseOver = function (d) {
+
+                    var x0 = x.invert(d3.mouse(this)[0]);
+                    var i = bisect(data.DataPoints, x0);
+
+                    if (i >= data.DataPoints.length) {
+                        i = data.DataPoints.length - 1;
+                    }
+
+                    var z0 = data.DataPoints[i - 1];
+                    var z1 = data.DataPoints[i];
+
+                    // work out which date value is closest to the mouse
+                    var selectedData = z0 === undefined || x0 - d3.isoParse(z0.MeasuredAt) > d3.isoParse(z1.MeasuredAt) - x0 ? z1 : z0;
+                    // customize the hover line
+                    focus
+                        .attr("x1", x(d3.isoParse(selectedData.MeasuredAt))) //hover line
+                        .attr("x2", x(d3.isoParse(selectedData.MeasuredAt)))
+                        .style("opacity", 1)
+                    // customize the text for the hover line
+                    focusText
+                        .html(selectedData.Value + data.UnitSymbol + "<br/>" + d3.isoParse(selectedData.MeasuredAt).toLocaleString())
+                        .attr("x", x(d3.isoParse(selectedData.MeasuredAt)) + 15)
+                        .attr("y", y(selectedData.Value))
+                        .style("left", (d3.event.pageX + 15) + "px")
+                        .style("top", (d3.event.pageY - 30) + "px")
+                        .style("opacity", 1)
+                };
+
+                // when leaving the graph
+                var tipMouseOut = function (d) {
+                    focus
+                        .style("opacity", 0)
+                    focusText
+                        .style("opacity", 0)
+                };
+
+                // append the dot
+                svg.append('g')
+                    .attr("class", "circles")
+
+
+                // append a rect on top of the svg area: this rectangle recovers mouse position
+                svg.append('rect')
+                    .style("fill", "none")
+                    .style("pointer-events", "all")
+                    .attr('width', width)
+                    .attr('height', height)
+                    .on('mouseover', tipMouseOver)
+                    .on('mousemove', tipMouseOver)
+                    .on('mouseout', tipMouseOut);
+
+                // y-axis label
+                svg.append("text")
+                    .attr("y", "-8 em")
+                    .attr("x", "-1.5em")
+                    .text(data.UnitSymbol);
+
+                // default view
+                toWeek();
+
+                // buttons
+                d3.select("#Månad").on("click", toMonth);
+                d3.select("#Vecka").on("click", toWeek);
+                d3.select("#Dygn").on("click", toDay);
+
+            })
+
+    </script>
+</body>
