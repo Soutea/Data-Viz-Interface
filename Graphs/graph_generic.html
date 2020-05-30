@@ -87,7 +87,7 @@
     <!-- Hardcoded values (no server) -->
     <div>
         <input type="hidden" id="requestURL"
-            value="https://raw.githubusercontent.com/Soutea/Data-Viz-Interface/master/Data/fredrik2.json" />
+            value="https://raw.githubusercontent.com/Soutea/Data-Viz-Interface/master/Data/db_flow2.json" />
         <input type="hidden" id="endDate" value="2020-05-27 00:00:00">
         <input type="hidden" id="endDate24" value="2020-05-28 00:00:00">
         <input type="hidden" id="startDateWeek" value="2020-05-20 00:00:00">
@@ -135,7 +135,7 @@
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
         // data
-        d3.json("https://raw.githubusercontent.com/Soutea/Data-Viz-Interface/master/Data/fredrik2.json",
+        d3.json("https://raw.githubusercontent.com/Soutea/Data-Viz-Interface/master/Data/db_flow2.json",
             function (data) {
 
                 //sort unsorted data
