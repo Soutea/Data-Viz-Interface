@@ -36,10 +36,6 @@
             display: none;
         }
 
-        .gridx .tick {
-            opacity: 0;
-        }
-
         .yaxis line {
             display: none;
         }
@@ -48,15 +44,12 @@
             stroke-width: 0;
         }
 
-        .form-controls--mr-graph {
-            margin-right: 90px;
-        }
-
         .band-text,
         .date-text,
-        .yaxis .tick {
+        .tick text {
             font-size: 12px;
             font-family: SANS-SERIF;
+            fill: #404E68;
         }
 
         .band>rect:nth-child(2n) {
@@ -67,13 +60,40 @@
             opacity: 0.1;
         }
 
-        .focus-text {
-            border-radius: 5px;
-        }
-
         .circles circle:hover {
             stroke-width: 6px;
             stroke: rgba(64, 78, 104, 0.34);
+        }
+
+        /** Styling of buttons **/
+        .buttons {
+            border: none;
+            text-align: right;
+            margin-right: 25px;
+            margin-top: 25px;
+        }
+
+        .button {
+            background-color: #404E68;
+            border: none;
+            color: white;
+            text-align: center;
+            display: inline-block;
+            font-size: 16px;
+            font-family: SANS-SERIF;
+        }
+
+        .button label {
+            padding: 15px 32px;
+            background-color: #404E68;
+        }
+
+        input[type=radio] {
+            display: none;
+        }
+
+        input[type=radio]:checked~* {
+            background: #808fa7;
         }
     </style>
 </head>
@@ -83,18 +103,17 @@
     <script src="https://d3js.org/d3.v4.js"></script>
 
     <!-- Buttons for toggling between views -->
-    <fieldset
-        class="form-controls form-controls--align-end form-controls--top-padding form-controls--no-margin form-controls--mr-graph">
-        <div class="form-controls form-controls--radio-tab">
-            <input type="radio" name="id58a6f4f8a0142" id="Månad" value="when-needed" />
+    <fieldset class="buttons">
+        <div class="button">
+            <input type="radio" name="button" id="Månad" />
             <label for="Månad">5 VECKOR</label>
         </div>
-        <div class="form-controls form-controls--radio-tab">
-            <input type="radio" checked="checked" name="id58a6f4f8a0142" id="Vecka" value="repeating" />
+        <div class="button">
+            <input type="radio" checked="checked" name="button" id="Vecka" />
             <label for="Vecka">7 DAGAR</label>
         </div>
-        <div class="form-controls form-controls--radio-tab">
-            <input type="radio" name="id58a6f4f8a0142" id="Dygn" value="when-needed" />
+        <div class="button">
+            <input type="radio" name="button" id="Dygn" />
             <label for="Dygn">24 TIMMAR</label>
         </div>
     </fieldset>
@@ -396,7 +415,9 @@
                 svg.append("text")
                     .attr("y", -25)
                     .attr("x", -25)
-                    .text("%");
+                    .text("%")
+                    .attr("font-family", "Sans-Serif")
+                    .attr("fill", "#404E68");
 
                 // default view
                 toWeek();
