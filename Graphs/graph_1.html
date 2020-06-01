@@ -17,7 +17,8 @@
             border: solid;
             border-width: 1px;
             padding: 10px;
-            font-family: SANS-SERIF;
+            font-family:'Segoe UI', sans-serif;
+            
         }
 
         .hover-line {
@@ -45,11 +46,17 @@
         }
 
         .band-text,
-        .date-text,
         .tick text {
             font-size: 12px;
-            font-family: SANS-SERIF;
+            font-family:'Segoe UI', sans-serif;
             fill: #404E68;
+        }
+
+        .date-text {
+            font-size: 16px;
+            font-weight: bold;
+            font-family:'Segoe UI', sans-serif;
+            fill: #637491;
         }
 
         .band>rect:nth-child(2n) {
@@ -80,7 +87,7 @@
             text-align: center;
             display: inline-block;
             font-size: 16px;
-            font-family: SANS-SERIF;
+            font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
         .button label {
@@ -257,13 +264,13 @@
                         .selectAll("text")
                         .data(dateInterval)
                         .attr("y", height + 60)
-                        .attr("x", width / 2.3) //positioning
+                        .attr("x", width / 2.4) //positioning
                         .text(d => dateLabel(dateInterval, dateFormat, dateFormat2, dateFormatInterval))
                     dateText.exit().remove()
                     dateText.enter().append("text")
                         .data(dateInterval)
                         .attr("y", height + 60)
-                        .attr("x", width / 2.3) // positioning
+                        .attr("x", width / 2.4  ) // positioning
                         .text(d => dateLabel(dateInterval, dateFormat, dateFormat2, dateFormatInterval))
                 }
 
@@ -416,7 +423,7 @@
                     .attr("y", -25)
                     .attr("x", -25)
                     .text("%")
-                    .attr("font-family", "Sans-Serif")
+                    .attr("font-family", "Segoe UI, sans-serif")
                     .attr("fill", "#404E68");
 
                 // default view

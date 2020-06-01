@@ -17,7 +17,7 @@
             border: solid;
             border-width: 1px;
             padding: 10px;
-            font-family: SANS-SERIF;
+            font-family: 'Segoe UI', sans-serif;
         }
 
         .hover-line {
@@ -49,11 +49,18 @@
         }
 
         .band-text,
-        .date-text,
         .tick text {
             font-size: 12px;
-            font-family: SANS-SERIF;
+            font-family: 'Segoe UI', sans-serif;
             fill: #404E68;
+        }
+
+        .date-text {
+            font-size: 16px;
+            font-weight: bold;
+            font-family: 'Segoe UI', sans-serif;
+            fill: #637491;
+
         }
 
         .band>rect:nth-child(2n) {
@@ -184,7 +191,6 @@
                     render({
                         dateInterval: [new Date(2020, 4, 11), new Date(2020, 4, 18)],
                         tickInterval: d3.timeDay.every(1),
-                        // tickFormat: { weekday: "long" }, <- before
                         tickFormat: new Intl.DateTimeFormat(undefined, { weekday: "long" }).format,
                         dateFormat: { day: "numeric", month: "long" },
                         dateFormat2: { day: "numeric", month: "long", year: "numeric" },
@@ -264,13 +270,13 @@
                         .selectAll("text")
                         .data(dateInterval)
                         .attr("y", height + 60)
-                        .attr("x", width / 2.3) // positioning
+                        .attr("x", width / 2.4) // positioning
                         .text(d => dateLabel(dateInterval, dateFormat, dateFormat2, dateFormatInterval))
                     dateText.exit().remove()
                     dateText.enter().append("text")
                         .data(dateInterval)
                         .attr("y", height + 60)
-                        .attr("x", width / 2.3) // positioning
+                        .attr("x", width / 2.4) // positioning
                         .text(d => dateLabel(dateInterval, dateFormat, dateFormat2, dateFormatInterval))
                 }
 
@@ -427,7 +433,7 @@
                     .attr("y", -25)
                     .attr("x", -25)
                     .text("%")
-                    .attr("font-family", "Sans-Serif")
+                    .attr("font-family", "Segoe UI, sans-serif")
                     .attr("fill", "#404E68");
 
                 // default view
