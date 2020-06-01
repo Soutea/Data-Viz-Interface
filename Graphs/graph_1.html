@@ -21,8 +21,8 @@
 
         .hover-line {
             stroke: #404e68;
-            stroke-opacity: 0.5;
-            stroke-width: 2px;
+            stroke-opacity: 1;
+            stroke-width: 1px;
         }
 
         .grid line {
@@ -33,6 +33,10 @@
 
         .xaxis .tick {
             display: none;
+        }
+
+        .gridx .tick {
+            opacity: 0;
         }
 
         .yaxis line {
@@ -59,6 +63,15 @@
 
         .band>rect {
             opacity: 0.1;
+        }
+
+        .focus-text {
+            border-radius: 5px;
+        }
+
+        .circles circle:hover {
+            stroke-width: 6px;
+            stroke: rgba(64, 78, 104, 0.34);
         }
     </style>
 </head>
@@ -340,14 +353,19 @@
                         .attr("x1", x(d3.isoParse(selectedData.Timestamp)))
                         .attr("x2", x(d3.isoParse(selectedData.Timestamp)))
                         .style("opacity", 1)
+
                     // customize the text for the hover line
+                    var measuredAtDate = new Date(selectedData.Timestamp);
+                    var formatYear = d3.timeFormat("%Y-%m-%d");
+                    var formatTimeStamp = d3.timeFormat("%H:%M");
+
                     focusText
-                        .html(selectedData.Oxygen + "%" + "<br/>" + d3.isoParse(selectedData.Timestamp).toLocaleString())
-                        .attr("x", x(d3.isoParse(selectedData.Timestamp)) + 15)
+                        .html(selectedData.Oxygen + "%<br/>" + formatYear(measuredAtDate) + "<br/>" + `kl ${formatTimeStamp(measuredAtDate)}`).attr("x", x(d3.isoParse(selectedData.Timestamp)) + 15)
                         .attr("y", y(selectedData.Oxygen))
                         .style("left", (d3.event.pageX + 15) + "px")
                         .style("top", (d3.event.pageY - 30) + "px")
-                        .style("opacity", 1)
+                        .style("opacity", 0.8)
+
                 };
 
                 // when leaving the graph

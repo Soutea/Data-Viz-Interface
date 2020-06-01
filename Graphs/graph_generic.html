@@ -21,8 +21,8 @@
 
         .hover-line {
             stroke: #404e68;
-            stroke-opacity: 0.5;
-            stroke-width: 2px;
+            stroke-opacity: 1;
+            stroke-width: 1px;
         }
 
         .grid line {
@@ -33,6 +33,10 @@
 
         .xaxis .tick {
             display: none;
+        }
+
+        .gridx .tick {
+            opacity: 0;
         }
 
         .yaxis line {
@@ -54,11 +58,23 @@
         }
 
         .band>rect:nth-child(2n) {
-            opacity: 0;
+            opacity: 0.5;
+            fill: #EFF1F6;
         }
 
         .band>rect {
-            opacity: 0.1;
+            opacity: 0.5;
+            fill: #FAFBFC;
+            
+        }
+
+        .focus-text {
+            border-radius: 5px;
+        }
+
+        .circles circle:hover {
+            stroke-width: 6px;
+            stroke: rgba(64, 78, 104, 0.34);
         }
     </style>
 </head>
@@ -87,7 +103,7 @@
     <!-- Hardcoded values (no server) -->
     <div>
         <input type="hidden" id="requestURL"
-            value="https://raw.githubusercontent.com/Soutea/Data-Viz-Interface/master/Data/db_flow2.json" />
+            value="https://raw.githubusercontent.com/Soutea/Covid-19_Measurements/master/JSON/db_flow.json" />
         <input type="hidden" id="endDate" value="2020-05-27 00:00:00">
         <input type="hidden" id="endDate24" value="2020-05-28 00:00:00">
         <input type="hidden" id="startDateWeek" value="2020-05-20 00:00:00">
@@ -363,19 +379,24 @@
 
                     // work out which date value is closest to the mouse
                     var selectedData = z0 === undefined || x0 - d3.isoParse(z0.MeasuredAt) > d3.isoParse(z1.MeasuredAt) - x0 ? z1 : z0;
+
                     // customize the hover line
                     focus
                         .attr("x1", x(d3.isoParse(selectedData.MeasuredAt))) //hover line
                         .attr("x2", x(d3.isoParse(selectedData.MeasuredAt)))
                         .style("opacity", 1)
+
                     // customize the text for the hover line
+                    var measuredAtDate = new Date(selectedData.MeasuredAt);
+                    var formatYear = d3.timeFormat("%Y-%m-%d");
+                    var formatTimeStamp = d3.timeFormat("%H:%M");
+
                     focusText
-                        .html(selectedData.Value + data.UnitSymbol + "<br/>" + d3.isoParse(selectedData.MeasuredAt).toLocaleString())
-                        .attr("x", x(d3.isoParse(selectedData.MeasuredAt)) + 15)
+                        .html(selectedData.Value + "%<br/>" + formatYear(measuredAtDate) + "<br/>" + `kl ${formatTimeStamp(measuredAtDate)}`).attr("x", x(d3.isoParse(selectedData.MeasuredAt)) + 15)
                         .attr("y", y(selectedData.Value))
                         .style("left", (d3.event.pageX + 15) + "px")
                         .style("top", (d3.event.pageY - 30) + "px")
-                        .style("opacity", 1)
+                        .style("opacity", 0.8)
                 };
 
                 // when leaving the graph
