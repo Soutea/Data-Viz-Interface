@@ -7,7 +7,7 @@ This folder is updated to only consist of json-files, which is the choice of dat
 
 - oxygen.json: *A very basic mocked flow from https://www.mockaroo.com/schemas/new*
 - db_flow1.json: *A more realistic attempt on a mocked database flow.*
-- db_flow2.json: *Another version of a mocked database flow.*
+- db_flow2.json: *Another realistic version of a mocked database flow.*
 
 ## Graphs
 Each file in this folder has code-comments for guiding. In case the code is unfamiliar or difficult to follow, please look at the documentation. In order to preview the graphs (Not a completed styling!), visit https://soutea.github.io/Data-Viz-Interface/ and add the path to the wanted version. For example, if graph_1.html will be viewed, visit https://soutea.github.io/Data-Viz-Interface/Graphs/graph_1.html
