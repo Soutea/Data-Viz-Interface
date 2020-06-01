@@ -17,6 +17,7 @@
             border: solid;
             border-width: 1px;
             padding: 10px;
+            font-family: 'Segoe UI', sans-serif;
         }
 
         .hover-line {
@@ -48,34 +49,38 @@
         }
 
         .form-controls--mr-graph {
-            margin-right: 90px;
+            margin-right: 30px;
         }
 
         .band-text,
-        .date-text,
-        .yaxis .tick {
+        .tick text {
             font-size: 12px;
+            font-family: 'Segoe UI', sans-serif;
+            fill: #404E68;
         }
 
-        .band>rect:nth-child(2n) {
-            opacity: 0.5;
-            fill: #EFF1F6;
+        .date-text {
+            font-size: 16px;
+            font-weight: bold;
+            font-family: 'Segoe UI', sans-serif;
+            fill: #637491;
         }
 
-        .band>rect {
-            opacity: 0.5;
-            fill: #FAFBFC;
-            
-        }
+            .band>rect:nth-child(2n) {
+                opacity: 0.5;
+                fill: #EFF1F6;
+            }
 
-        .focus-text {
-            border-radius: 5px;
-        }
+            .band>rect {
+                opacity: 0.5;
+                fill: #FAFBFC;
 
-        .circles circle:hover {
-            stroke-width: 6px;
-            stroke: rgba(64, 78, 104, 0.34);
-        }
+            }
+
+            .circles circle:hover {
+                stroke-width: 6px;
+                stroke: rgba(64, 78, 104, 0.34);
+            }
     </style>
 </head>
 
@@ -257,13 +262,13 @@
                         .selectAll("text")
                         .data(dateInterval)
                         .attr("y", height + 60)
-                        .attr("x", width / 2.3) //position
+                        .attr("x", width / 2.4) //position
                         .text(d => dateLabel(dateInterval, dateFormat, dateFormat2, dateFormatInterval))
                     dateText.exit().remove()
                     dateText.enter().append("text")
                         .data(dateInterval)
                         .attr("y", height + 60)
-                        .attr("x", width / 2.3) //position
+                        .attr("x", width / 2.4) //position
                         .text(d => dateLabel(dateInterval, dateFormat, dateFormat2, dateFormatInterval))
                 }
 
@@ -424,9 +429,11 @@
 
                 // y-axis label
                 svg.append("text")
-                .attr("y", -25)
-                .attr("x", -25)
-                    .text(data.UnitSymbol);
+                    .attr("y", -25)
+                    .attr("x", -25)
+                    .text(data.UnitSymbol)
+                    .attr("font-family", "Segoe UI, sans-serif")
+                    .attr("fill", "#404E68");
 
                 // default view
                 toWeek();
