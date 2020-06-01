@@ -17,6 +17,7 @@
             border: solid;
             border-width: 1px;
             padding: 10px;
+            font-family: SANS-SERIF;
         }
 
         .hover-line {
@@ -55,6 +56,7 @@
         .date-text,
         .yaxis .tick {
             font-size: 12px;
+            font-family: SANS-SERIF;
         }
 
         .band>rect:nth-child(2n) {
@@ -123,9 +125,9 @@
             }
         }
         // set the default dimensions and margins
-        var margin = { top: 20, right: 30, bottom: 80, left: 60 },
+        var margin = { top: 40, right: 30, bottom: 80, left: 60 },
             width = 900 - margin.left - margin.right,
-            height = 500 - margin.top - margin.bottom;
+            height = 550 - margin.top - margin.bottom;
 
         // append the svg object to the div element "graphs" in the body
         var svg = d3.select("#graphs").append("svg")
@@ -392,8 +394,8 @@
 
                 // y-axis label
                 svg.append("text")
-                    .attr("y", "-8 em")
-                    .attr("x", "-1.5em")
+                    .attr("y", -25)
+                    .attr("x", -25)
                     .text("%");
 
                 // default view
