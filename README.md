@@ -14,8 +14,8 @@ Each file in this folder has code-comments for guiding. In case the code is unfa
 
 - graph_1.html: *This graph has hardcoded values and is based on the data found in oxygen.json*
 - graph_2.html: *This graph has hardcoded values and is based on the data found in db_flow2.json*
-- graph_generic.html: *This graph has a generic approach and is not available to preview without further customization.*
-- graph_animated.html: *This graph is slightly outdated and belongs to an older prototype. Has working transitions, allowing a dynamic toggling.*
+- graph_generic.html: *This graph has a generic approach and is based on the data found in db_flow2.json. Note that it is not available to preview without customization of the code. Instead, the primary purpose is for code review.*
+- graph_animated.html: *This graph is outdated and belongs to an older prototype. Has working transitions, allowing a dynamic toggling.*
 
 ## Cloning the interface
-Feel free to clone and use the repository as you wish. If another data flow is to be bound, just replace the link to another hosted GitHub-link with the provided data. Remember to re-bound the labels of the new data flow to the scatter points. If the hardcoded version of the interface is to be used, adapt the axes to show the correct time interval. In the case where the generic interface will be used, the axes do not need to be changed and will match accordingly. Note that the generic interface requires jQuery to work. For more information, contact **@Soutea.**
+Feel free to clone and use the repository as you wish. If another data flow is to be bound, just replace the link to another web link hosting the data. Remember to rebound the labels of the new data flow to the scatter points. If the hardcoded version of the interface is to be used, adapt the axes to show the correct time interval. In the case where the generic interface will be used, the axes do not need to be changed and will match accordingly. Note that the generic interface requires jQuery to work. For more information, contact **@Soutea.**
